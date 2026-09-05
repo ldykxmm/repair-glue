@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关系复原胶</title>
+<style>
+*{webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;-moz-text-size-adjust:100%!important;box-sizing:border-box;font:inherit}
+html{color:#333;font-size:62.5%}
+@media screen and (max-width:480px){html{font-size:50%}}
+body{font-size:2.4rem;padding:0;margin:0;width:100vw;height:100vh;font-family:Rubik,sans-serif;background:#fff}
+.accepted,.confirm,.rejected{position:absolute;display:flex;flex-direction:column;overflow:hidden;top:50%;left:50%;transform:translate(-50%,-50%);width:72rem;max-width:100%;min-width:34rem;max-height:100%;height:46rem;background-color:#fff;border-radius:1rem}
+.accepted-body,.confirm-body,.rejected-body{flex:1;display:flex;align-items:flex-end;justify-content:space-between;position:relative;margin:2rem 4rem}
+.accepted-body-title,.confirm-body-title,.rejected-body-title{padding-bottom:5rem;margin:0;padding:0;padding-bottom:3rem;position:absolute;transform:translateY(-50%);top:5%;text-align:center;width:100%}
+.accepted-body-subtitle,.confirm-body-subtitle,.rejected-body-subtitle{font-size:1.6rem;margin:0;padding:0;padding-bottom:1rem;position:absolute;transform:translateY(-50%);top:15%;text-align:center;width:100%;font-size:1.6rem}
+.accepted-body-button,.confirm-body-button,.confirm-body-button:link,.confirm-body-button:visited,.rejected-body-button{color:#fff;border-radius:1rem;text-decoration:none;padding:1rem 2rem;margin-bottom:1rem;min-width:10rem;text-align:center;transition:background-color .3s,transform .3s}
+.confirm-body-button-delete{background-color:#a43;margin-right:10%}
+.confirm-body-button-delete:hover{background-color:#c85a48}
+.confirm-body-button-cancel{background-color:#6a4;margin-left:10%}
+.confirm-body-button-cancel:hover{background-color:#81c061}
+.accepted-body-button,.rejected-body-button{background-color:#6a4}
+.accepted-body-button:hover,.rejected-body-button:hover{background-color:#81c061}
+.boi{--happiness:0.9;--derp:1;--px:0.5;--py:0.5;width:22rem;max-width:100%;height:22rem;top:50%;left:50%;transform:translate(-50%,-50%);background-image:radial-gradient(#f7e0b2,#eb5);border-radius:100%;overflow:hidden;margin:0;align-self:center;flex:0 0 auto;border:solid 2px #ecb23e;box-shadow:0 0 5px rgba(0,0,0,.2)}
+.boi,.boi *{position:absolute}
+.boi::before{content:'';display:block;width:100%;height:100%;top:0;left:0;background-image:linear-gradient(to bottom,#5a8,rgba(85,170,136,0));opacity:calc(1 - var(--happiness))}
+.boi-blush{width:20%;height:10%;background-color:rgba(255,100,100,.3);border:3px solid rgba(255,100,100,.3);top:calc(45% + var(--py) * 10%);border-radius:100%;opacity:calc(var(--happiness) * var(--happiness) * .9 + .1)}
+.boi-blush-left{left:calc(7% + var(--px) * 2%)}
+.boi-blush-right{right:calc(9% - var(--px) * 2%)}
+.boi-eye{width:calc(26% - var(--happiness) * 2%);height:calc(26% - var(--happiness) * 2%);background-color:#f6f6f6;border-radius:100%;top:calc(25% + var(--py) * 10%);overflow:hidden}
+.boi-eye-left{left:calc(18% + var(--px) * 4%)}
+.boi-eye-left::after{transform:translate(calc((var(--px) + var(--derp) * .5) * 100%),calc((var(--py) + var(--derp) * .5) * 100%))}
+.boi-eye-right{right:calc(22% - var(--px) * 4%)}
+.boi-eye-right::after{transform:translate(calc((var(--px) + var(--derp) * -.3) * 100%),calc((var(--py) + var(--derp) * -.3) * 100%))}
+.boi-eye::after{content:'';display:block;background-color:#421;width:calc(55% - var(--happiness) * 10%);height:calc(55% - var(--happiness) * 10%);border-radius:100%}
+.boi-mouth{width:calc(51% - var(--happiness) * 2%);height:calc(26% - var(--happiness) * 2%);background-color:#a33;border-radius:calc((1 - var(--happiness)) * 10em) calc((1 - var(--happiness)) * 10em) calc(var(--happiness) * 16em) calc(var(--happiness) * 16em);top:calc(57.5% + var(--py) * 5%);left:calc(47.5% + var(--px) * 5%);transform:translateX(-50%);overflow:hidden;border:3px solid #962d2d;-webkit-mask-image:-webkit-radial-gradient(white,#000)}
+.boi-mouth::before{content:'';display:block;position:absolute;width:20%;height:20%;top:0;left:50%;background-color:#fff;border-radius:0 0 .5rem .5rem}
+.boi-mouth::after{content:'';display:block;position:absolute;width:60%;height:50%;left:10%;bottom:0;background-color:rgba(0,0,0,.2);border-radius:20rem 20rem 0 0}
+.hidden{display:none}
+@media screen and (max-width:600px){.confirm-body-title,.accepted-body-title{font-size:2.8rem}.confirm-body-subtitle,.accepted-body-subtitle{font-size:2rem}}
+.accepted,.confirm,.rejected{width:min(76rem,calc(100vw - 2rem));max-width:76rem;min-width:0;height:56rem;max-height:calc(100vh - 10rem);max-height:calc(100dvh - 10rem)}
+.accepted-body,.confirm-body,.rejected-body{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto 1fr auto;gap:1.4rem 4rem;align-items:center;justify-content:normal;margin:2.4rem clamp(2rem,6vw,4.5rem);min-height:0}
+.accepted-body,.rejected-body{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
+.accepted-body-title,.confirm-body-title,.rejected-body-title,.accepted-body-subtitle,.confirm-body-subtitle,.rejected-body-subtitle{position:relative;top:auto;transform:none;width:100%;padding:0;margin:0;grid-column:1/-1;line-height:1.2;overflow-wrap:anywhere;word-break:break-word;z-index:2;pointer-events:none}
+.accepted-body-subtitle,.confirm-body-subtitle,.rejected-body-subtitle{line-height:1.35}
+.accepted-body>.boi,.confirm-body>.boi,.rejected-body>.boi{--emoji-size:min(36rem,58vw,34dvh);position:relative;top:auto;left:auto;transform:none;grid-column:1/-1;justify-self:center;align-self:center;width:var(--emoji-size);height:var(--emoji-size)}
+.confirm-body-button{position:relative;justify-self:center;align-self:end;width:min(22rem,40vw);min-width:12rem;margin:0;white-space:nowrap;z-index:5}
+.confirm-body-button-delete{z-index:8}
+.confirm-body-button-cancel{margin-left:0;transform-origin:center center!important}
+.confirm-body-button-delete{margin-right:0}
+@media screen and (max-width:600px){.accepted,.confirm,.rejected{width:calc(100vw - 1.5rem);max-width:calc(100vw - 1.5rem);height:58rem;max-height:calc(100vh - 14rem);max-height:calc(100dvh - 14rem);border-radius:1rem}.accepted-body,.confirm-body,.rejected-body{margin:2rem 2.2rem;gap:1.2rem 2rem}.accepted-body>.boi,.confirm-body>.boi,.rejected-body>.boi{--emoji-size:min(30rem,60vw,27dvh)}}
+.accepted-video{position:relative;grid-column:1/-1;justify-self:center;align-self:center;width:min(68rem,94vw);height:auto;max-height:calc(100dvh - 17rem);aspect-ratio:16/9;display:block;object-fit:contain;border-radius:1.6rem;background:#000;box-shadow:0 1.2rem 3rem rgba(0,0,0,.2)}
+.accepted{height:min(76rem,calc(100dvh - 2rem));max-height:calc(100dvh - 2rem)}
+.accepted-body{margin:1.5rem;gap:.8rem}
+@media screen and (min-width:601px){.accepted-video{width:min(68rem,86vw);max-height:calc(100dvh - 16rem)}}
+.repair-glue{overflow:visible;border:0;border-radius:0;background:none;box-shadow:none;isolation:isolate;filter:drop-shadow(0 1.2rem 1.8rem rgba(0,0,0,.35))}
+.repair-glue::before{content:'';display:block;width:82%;height:82%;top:9%;left:9%;z-index:2;border-radius:50%;opacity:1;background:radial-gradient(circle at 34% 25%,rgba(255,255,255,.92)0 3%,transparent 10%),radial-gradient(circle at 66% 70%,rgba(146,91,0,.26)0 5%,transparent 12%),radial-gradient(circle at 25% 70%,rgba(255,177,0,.38)0 7%,transparent 16%),radial-gradient(circle at 48% 45%,#ffe847 0 25%,#f6c51c 58%,#ba7600 100%);border:.35rem solid rgba(255,236,100,.9);box-shadow:inset -1.6rem -1.2rem 2.4rem rgba(107,63,0,.34),inset 1rem 1rem 1.8rem rgba(255,255,255,.34),0 0 2.8rem rgba(255,220,42,.62);transform:scale(calc(.96 + var(--happiness) * .04));transition:filter .25s ease}
+.repair-glue::after{content:'';display:block;width:112%;height:40%;left:-6%;top:30%;z-index:1;border:.7rem solid #27dcff;border-left-color:rgba(39,220,255,.12);border-radius:50%;box-shadow:0 0 1.2rem #1dc9ff,inset 0 0 1rem rgba(52,224,255,.55);transform:rotate(-12deg);animation:repairOrbit 7s linear infinite}
+.repair-bandage{width:94%;height:40%;left:3%;top:30%;border:.32rem solid #cf8e42;border-radius:2rem;background:radial-gradient(circle,rgba(157,101,43,.34)0 9%,transparent 11%)0 0/1.55rem 1.55rem,linear-gradient(90deg,#f8dda0 0 27%,#dc9852 27% 73%,#f8dda0 73% 100%);box-shadow:0 1.4rem 2.6rem rgba(0,0,0,.42),0 0 2.2rem rgba(255,190,91,.22),inset 0 .28rem .6rem rgba(255,255,255,.58);transform:rotate(-7deg)translate(calc((var(--px) - .5) * 1.2rem),calc((var(--py) - .5) * 1.2rem));animation:repairBandageFloat 2.8s ease-in-out infinite alternate}
+.repair-bandage-eye{width:.7rem;height:1.45rem;top:27%;transform:translate(var(--look-x,0),var(--look-y,0))scaleY(var(--eye-open,1));transform-origin:center bottom}
+.repair-bandage-smile{height:28%;border-bottom:.48rem solid #754426;opacity:var(--smile-opacity,1);transform:translate(var(--mouth-x,0),var(--mouth-y,0))scaleX(var(--smile-width,1));transition:opacity .08s linear}
+.repair-bandage-frown{width:18%;height:25%;left:41%;top:57%;z-index:3;opacity:var(--sad-opacity,0);border-top:.48rem solid #754426;border-radius:50% 50% 0 0;transform:translate(var(--mouth-x,0),var(--mouth-y,0))scaleX(var(--frown-width,1));transition:opacity .08s linear}
+.repair-bandage-brow{width:10%;height:.34rem;top:18%;z-index:4;border-radius:1rem;background:#8b542f;opacity:var(--brow-opacity,.12);transform-origin:center}
+.repair-bandage-brow-left{left:37%;transform:translate(var(--look-x,0),var(--look-y,0))rotate(var(--brow-left,0deg))}
+.repair-bandage-brow-right{right:37%;transform:translate(var(--look-x,0),var(--look-y,0))rotate(var(--brow-right,0deg))}
+.repair-bandage-blush{width:9%;height:15%;top:45%;z-index:2;border-radius:50%;background:rgba(224,91,81,.34);opacity:var(--blush-opacity,.7)}
+.repair-bandage-blush-left{left:31%}
+.repair-bandage-blush-right{right:31%}
+.confirm,.accepted,.rejected{color:#333;background:#fff;box-shadow:0 .8rem 2.8rem rgba(49,54,68,.14)}
+.confirm-body-subtitle,.accepted-body-subtitle,.rejected-body-subtitle{color:#666}
+.confirm-body-button-cancel{background:linear-gradient(135deg,#19c9ba,#237ff2);box-shadow:0 .6rem 1.5rem rgba(26,180,221,.24)}
+.confirm-body-button-cancel:hover{background:linear-gradient(135deg,#29dfcb,#3b93ff)}
+.confirm-body-button-delete{background:#a43;border:0}
+.confirm-body-button-delete:hover{background:#c85a48}
+@keyframes repairOrbit{from{transform:rotate(-12deg)}to{transform:rotate(348deg)}}
+@keyframes repairBandageFloat{from{margin-top:-.5rem}to{margin-top:.7rem}}
+@media (prefers-reduced-motion:reduce){.repair-bandage{animation:none}}
+.accepted-body{grid-template-rows:minmax(2rem,1fr)auto auto auto minmax(2rem,1fr);text-align:center}
+.accepted-body-title{grid-row:2;justify-self:center;text-align:center}
+.accepted-body-subtitle{grid-row:3;justify-self:center;text-align:center;padding-bottom:3rem}
+.accepted-video{grid-row:4}
+.template-footer{position:fixed;right:0;bottom:8px;left:0;z-index:8;color:rgba(0,0,0,.25);font-size:11px;letter-spacing:0;text-align:center;pointer-events:none}
+</style>
+</head>
+<body>
+
+<section class="confirm">
+<div class="confirm-body">
+<h2 class="confirm-body-title">要使用关系复原胶吗？</h2>
+<h3 class="confirm-body-subtitle">把裂开的关系重新粘好，再给彼此一次机会</h3>
+<figure class="boi repair-glue" style="--happiness:0.9; --derp:1; --px:0.5; --py:0.5;">
+<div class="repair-bandage">
+    <i class="repair-bandage-brow repair-bandage-brow-left"></i>
+    <i class="repair-bandage-brow repair-bandage-brow-right"></i>
+    <i class="repair-bandage-eye repair-bandage-eye-left"></i>
+    <i class="repair-bandage-eye repair-bandage-eye-right"></i>
+    <i class="repair-bandage-blush repair-bandage-blush-left"></i>
+    <i class="repair-bandage-blush repair-bandage-blush-right"></i>
+    <i class="repair-bandage-smile"></i>
+    <i class="repair-bandage-frown"></i>
+</div>
+</figure>
+<a class="confirm-body-button confirm-body-button-cancel" href="javascript:void(0)" style="font-size:2.5rem;">使用复原胶</a>
+<a class="confirm-body-button confirm-body-button-delete" href="javascript:void(0)">暂不修复</a>
+</div>
+</section>
+
+<section class="accepted hidden">
+<div class="accepted-body">
+<h2 class="accepted-body-title">关系复原成功！</h2>
+<h3 class="accepted-body-subtitle">愿我们把所有裂缝都慢慢补好</h3>
+<video id="acceptedVideo" class="accepted-video" preload="metadata" loop playsinline webkit-playsinline x5-playsinline>
+<source src="1.mp4" type="video/mp4">
+</video>
+</div>
+</section>
+
+<section class="rejected hidden">
+<div class="rejected-body">
+<h2 class="rejected-body-title">复原胶会一直等你...</h2>
+<h3 class="rejected-body-subtitle">有些关系值得再给彼此一次机会</h3>
+<figure class="boi repair-glue" style="--happiness:0.2; --derp:0; --px:0.5; --py:0.5;">
+<div class="repair-bandage">
+    <i class="repair-bandage-brow repair-bandage-brow-left"></i>
+    <i class="repair-bandage-brow repair-bandage-brow-right"></i>
+    <i class="repair-bandage-eye repair-bandage-eye-left"></i>
+    <i class="repair-bandage-eye repair-bandage-eye-right"></i>
+    <i class="repair-bandage-blush repair-bandage-blush-left"></i>
+    <i class="repair-bandage-blush repair-bandage-blush-right"></i>
+    <i class="repair-bandage-smile"></i>
+    <i class="repair-bandage-frown"></i>
+</div>
+</figure>
+</div>
+</section>
+
+<div class="template-footer">内容仅供展示与娱乐</div>
+
+<script>
+const confirmSection = document.querySelector('.confirm');
+const acceptedSection = document.querySelector('.accepted');
+const rejectedSection = document.querySelector('.rejected');
+const boi = document.querySelector('.boi');
+const btnDelete = document.querySelector('.confirm-body-button-delete');
+const btnCancel = document.querySelector('.confirm-body-button-cancel');
+const acceptedVideo = document.getElementById('acceptedVideo');
+
+const current = { happiness: 0.9, derp: 1, px: 0.5, py: 0.5 };
+const target = { ...current };
+let rejectCount = 0;
+
+confirmSection.addEventListener('pointermove', onMouseMove);
+confirmSection.addEventListener('pointerleave', onMouseLeave);
+
+btnCancel.addEventListener('click', () => {
+    confirmSection.classList.add('hidden');
+    acceptedSection.classList.remove('hidden');
+    target.happiness = 1;
+    updateBoi();
+    acceptedVideo.currentTime = 0;
+    acceptedVideo.play().catch(() => { acceptedVideo.controls = true; });
+});
+
+btnDelete.addEventListener('click', () => {
+    rejectCount++;
+    if (rejectCount >= 3) {
+        btnDelete.style.position = 'absolute';
+        const bodyRect = btnDelete.parentElement.getBoundingClientRect();
+        const btnRect = btnDelete.getBoundingClientRect();
+        const maxLeft = Math.max(0, bodyRect.width - btnRect.width);
+        const maxTop = Math.max(0, bodyRect.height - btnRect.height);
+        const safeLeftMin = Math.min(maxLeft, bodyRect.width * 0.08);
+        const safeLeftMax = Math.max(safeLeftMin, Math.min(maxLeft, bodyRect.width * 0.68));
+        const safeTopMin = Math.min(maxTop, bodyRect.height * 0.58);
+        const safeTopMax = Math.max(safeTopMin, Math.min(maxTop, bodyRect.height * 0.82));
+        btnDelete.style.left = `${safeLeftMin + Math.random() * (safeLeftMax - safeLeftMin)}px`;
+        btnDelete.style.top = `${safeTopMin + Math.random() * (safeTopMax - safeTopMin)}px`;
+        const style = window.getComputedStyle(btnCancel);
+        btnCancel.style.paddingTop = Number(style.paddingTop.replace('px','')) * 0.8 + "px";
+        btnCancel.style.paddingBottom = Number(style.paddingBottom.replace('px','')) * 0.8 + "px";
+        btnCancel.style.paddingLeft = Number(style.paddingLeft.replace('px','')) * 0.6 + "px";
+        btnCancel.style.paddingRight = Number(style.paddingRight.replace('px','')) * 0.6 + "px";
+        if (rejectCount <= 8) {
+            btnCancel.style.fontSize = (parseFloat(btnCancel.style.fontSize || '2.5') * 0.9) + "rem";
+        }
+    }
+    target.happiness = Math.max(0.1, target.happiness - 0.1);
+    btnCancel.style.transform = `scale(${Math.min(1 + rejectCount * 0.45, 3.6)})`;
+    updateBoi();
+});
+
+function onMouseMove({ clientX: x, clientY: y }) {
+    const deleteRect = btnDelete.getBoundingClientRect();
+    const cancelRect = btnCancel.getBoundingClientRect();
+    const confirmRect = confirmSection.getBoundingClientRect();
+    const dx1 = x - deleteRect.x - deleteRect.width * 0.5;
+    const dy1 = y - deleteRect.y - deleteRect.height * 0.5;
+    const dx2 = x - cancelRect.x - cancelRect.width * 0.5;
+    const dy2 = y - cancelRect.y - cancelRect.height * 0.5;
+    const px = (x - confirmRect.x) / confirmRect.width;
+    const py = (y - confirmRect.y) / confirmRect.height;
+    const distDelete = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+    const distCancel = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+    target.happiness = Math.pow(distDelete / (distCancel + distDelete), 0.75);
+    target.derp = 0;
+    target.px = px;
+    target.py = py;
+}
+
+function onMouseLeave() {
+    target.happiness = 0.9;
+    target.derp = 1;
+    target.px = 0.5;
+    target.py = 0.5;
+}
+
+function updateBoi() {
+    for (let prop in target) {
+        if (target[prop] === current[prop]) continue;
+        else if (Math.abs(target[prop] - current[prop]) < 0.01) current[prop] = target[prop];
+        else current[prop] += (target[prop] - current[prop]) * 0.1;
+        boi.style.setProperty(`--${prop}`, current[prop]);
+    }
+    const mood = Math.max(0, Math.min(1, current.happiness));
+    const sadLevel = Math.max(0, Math.min(1, (0.85 - mood) / 0.55));
+    const smileLevel = Math.max(0, Math.min(1, (mood - 0.42) / 0.36));
+    const lookX = (current.px - 0.5) * 0.9;
+    const lookY = (current.py - 0.5) * 0.65;
+    boi.style.setProperty('--look-x', lookX.toFixed(3) + 'rem');
+    boi.style.setProperty('--look-y', lookY.toFixed(3) + 'rem');
+    boi.style.setProperty('--mouth-x', (lookX * 0.35).toFixed(3) + 'rem');
+    boi.style.setProperty('--mouth-y', (lookY * 0.25).toFixed(3) + 'rem');
+    boi.style.setProperty('--eye-open', (0.64 + mood * 0.36).toFixed(3));
+    boi.style.setProperty('--smile-opacity', smileLevel.toFixed(3));
+    boi.style.setProperty('--sad-opacity', sadLevel.toFixed(3));
+    boi.style.setProperty('--brow-opacity', (0.1 + sadLevel * 0.9).toFixed(3));
+    boi.style.setProperty('--blush-opacity', (0.12 + smileLevel * 0.62).toFixed(3));
+    boi.style.setProperty('--smile-width', (0.72 + mood * 0.42).toFixed(3));
+    boi.style.setProperty('--frown-width', (0.72 + sadLevel * 0.38).toFixed(3));
+    boi.style.setProperty('--brow-left', (-sadLevel * 22).toFixed(2) + 'deg');
+    boi.style.setProperty('--brow-right', (sadLevel * 22).toFixed(2) + 'deg');
+    requestAnimationFrame(updateBoi);
+}
+
+updateBoi();
+</script>
+</body>
+</html>
